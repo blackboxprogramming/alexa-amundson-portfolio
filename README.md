@@ -323,7 +323,7 @@ This resume package contains **comprehensive analysis** built from deep-dive of 
 - [ ] Add deployment timing to GitHub Actions
 - [ ] Create health check cron (every 5 min)
 - [ ] Add latency middleware to FastAPI
-- [ ] Create `~/blackroad-metrics.sh` dashboard script
+- [x] Create `~/blackroad-metrics.sh` dashboard script
 
 ### Week 3-4: Data Collection
 - [ ] Collect 2 weeks of metrics baseline
