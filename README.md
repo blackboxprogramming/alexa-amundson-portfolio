@@ -26,6 +26,16 @@ I bring quantitative analysis from regulated finance and production-grade infras
 
 ---
 
+## Technical Papers
+
+| Paper | Description |
+|-------|-------------|
+| **[Edge AI Inference on ARM](PAPER_EDGE_AI_INFERENCE.md)** | Benchmarking 29 LLMs on Pi 5 — token throughput, latency, code generation quality, thermal analysis |
+| **[Distributed Mesh Networking](PAPER_DISTRIBUTED_MESH.md)** | 6-node production architecture — WireGuard, Cloudflare edge, Gitea, failure modes, 9 months of operational data |
+| **[Quantum & Computational Experiments](PAPER_QUANTUM_EXPERIMENTS.md)** | 11 experiments on NVMe — Riemann visualization, fine-structure constant, multi-node quantum simulation |
+
+---
+
 ## Resume Variants
 
 | Role Target | File |
