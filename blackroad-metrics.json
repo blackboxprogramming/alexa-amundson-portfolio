@@ -1,16 +1,16 @@
 {
   "generated_at": "2026-03-06T00:00:00Z",
-  "last_updated": "2026-03-06T00:00:00Z",
+  "last_updated": "2026-03-09T00:00:00Z",
   "summary": {
     "total_code_lines": 899160,
-    "repositories": 113,
+    "repositories": 1370,
     "files": 1723,
     "scripts": 140,
-    "size_mb": 97
+    "size_mb": 684
   },
   "github": {
-    "total_repos": 113,
-    "total_size_mb": 97,
+    "total_repos": 1370,
+    "total_size_mb": 684,
     "organizations": 15,
     "languages": {
       "HTML": 56,

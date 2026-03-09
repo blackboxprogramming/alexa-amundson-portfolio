@@ -60,7 +60,7 @@
 ## Tier 2: Great Fit (Strong candidate)
 
 ### 4. **GitHub**
-**Why:** 113+ repos, 15 orgs, public portfolio showcasing GitHub ecosystem
+**Why:** 1,370+ repos, 15 orgs, public portfolio showcasing GitHub ecosystem
 **Roles:** Developer Advocate, Solutions Engineer, Platform Engineer
 
 **Application:** Show github.com/BlackRoad-OS organization, public portfolio

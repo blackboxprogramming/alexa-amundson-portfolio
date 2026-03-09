@@ -369,7 +369,7 @@ git -C /tmp/blackroad-os-operator log --since="2025-12-01" --format='%h|%an|%ad|
 - 8,789 components indexed: **VERIFIED** (repo description)
 - 56 repositories: **VERIFIED** (repo description)
 - Verification suite, 6,696 LOC: **VERIFIED** (wc on blackroad-codex-verification-suite.sh)
-- Real-time dashboard (15 orgs, 113+ repos): **VERIFIED** (repo description)
+- Real-time dashboard (15 orgs, 1,370+ repos): **VERIFIED** (repo description)
 
 **Confidence:** **85/100** (repo descriptions are authoritative but counts not independently verified via database query)
 

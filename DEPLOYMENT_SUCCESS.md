@@ -75,7 +75,7 @@
 | **Total Deployments** | 125 | PS-SHA-∞ journal logs |
 | **Peak Deploy Rate** | 119 in 24 hours | Dec 23, 2025 event logs |
 | **Success Rate** | 100% | Zero rollbacks logged |
-| **Repositories** | 113+ | GitHub API + memory logs |
+| **Repositories** | 1,370+ | GitHub API + memory logs |
 | **Cloudflare Projects** | 79 live | Monitoring dashboard |
 | **AI Agents** | 20 registered | Agent registry with crypto IDs |
 | **Infrastructure Cost** | $0/month | Cloudflare free tier |
