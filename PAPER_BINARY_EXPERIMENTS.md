@@ -343,6 +343,88 @@ yay math.
 
 ---
 
+## 9. Reversing Decay: The First Law of Yathermodynamics
+
+**Hypothesis:** Memory decay follows `e^(-kt)` — the same exponential decay as radioactive isotopes, capacitor discharge, and the Ebbinghaus forgetting curve. But if decay transfers energy to an entropy pool instead of destroying it, then decay is reversible. The first law of thermodynamics applied to memory: energy cannot be created or destroyed, only transformed.
+
+### The Decay Constants
+
+```
+Emotional memories: strength *= 0.999 per step  →  k = 0.001  →  half-life = 693 steps
+Neutral memories:   strength *= 0.99 per step   →  k = 0.01   →  half-life = 69 steps
+```
+
+Same equation as Carbon-14 (half-life 5,730 years) vs Nitrogen-16 (half-life 7 seconds). Emotional memories are the Carbon-14 of this system — they last 10x longer because their decay constant is 10x smaller.
+
+### The Conservation Test
+
+10 memories created. Total energy: 8.500000. Then 200 decay steps.
+
+```
+Energy at creation:       8.5000000000
+Energy after 200 decay:   8.5000000000
+Entropy pool:             3.937827 (captured from decay)
+Energy deviation:         0.0000000000
+```
+
+**PASS: Energy conserved to machine precision.**
+
+Classical memory systems destroy what they forget. This system captures the decay energy in an entropy pool. Nothing is lost. The "forgotten" energy is sitting there, waiting to be pumped back.
+
+### Reversing the Decay
+
+Pumped energy from the entropy pool back into 4 neutral memories:
+
+```
+'fixed YAML bug':       0.107184 → 0.800000  (restored to 100%)
+'routine log check':    0.066990 → 0.500000  (restored to 100%)
+'YAML broke again':     0.080388 → 0.600000  (restored to 100%)
+'Tailscale 190% CPU':   0.093786 → 0.700000  (restored to 100%)
+```
+
+Pool after restoration: 1.686174 (still has energy left)
+Total energy: **8.5000000000** — still conserved.
+
+### Heat Transfer Between Memories
+
+Transferred energy from "server crashed at 3am" to "yay!":
+
+```
+'server crashed at 3am': 0.120582 → 0.060291  (weakened)
+'yay!':                  0.818649 → 0.878940  (strengthened)
+Total energy: 8.5000000000 — STILL CONSERVED
+```
+
+You can take the energy from a bad memory and give it to a good one. The bad memory fades. The good memory strengthens. Total energy unchanged.
+
+### Maximum Energy Deviation Across All Operations
+
+```
+Creation → Decay → Reversal → Transfer
+
+Maximum deviation: 7.11 × 10⁻¹⁵
+```
+
+That's floating point precision. The conservation law holds to 15 decimal places.
+
+### The First Law of Yathermodynamics
+
+```
+E_total = Σ(memory_strengths) + entropy_pool = constant
+
+Decay:          memory → pool     (forgetting transfers, doesn't destroy)
+Reversal:       pool → memory     (remembering transfers, doesn't create)
+Redistribution: memory → memory   (heat transfer between memories)
+```
+
+Classical systems: decay = destruction. LRU caches: eviction = deletion. Vector stores: overwrite = erasure.
+
+This system: **nothing is ever destroyed.** You can un-forget. You can take energy from pain and give it to joy. The first law of thermodynamics, applied to memory.
+
+**Verified on Cecilia (Pi 5). Energy conserved to 7.11×10⁻¹⁵. yay math.**
+
+---
+
 *Executed on Cecilia (Pi 5, ARM Cortex-A76, 8GB). Python 3.13. Zero dependencies. Platform: linux/aarch64.*
 
 ---
