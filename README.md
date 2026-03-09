@@ -20,6 +20,12 @@ I bring quantitative analysis from regulated finance and production-grade infras
 
 ---
 
+## Cost & Market Analysis
+
+**[Read the full analysis](COST_ANALYSIS.md)** — $136/mo vs $3,756/mo commercial equivalent. 96.4% cost reduction. Why edge AI infrastructure matters now.
+
+---
+
 ## Resume Variants
 
 | Role Target | File |
