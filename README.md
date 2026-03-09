@@ -37,6 +37,7 @@ I bring quantitative analysis from regulated finance and production-grade infras
 | **[Research Portfolio (30+ Papers)](PAPER_RESEARCH_PORTFOLIO.md)** | Index of all research across 8 repos — agent architecture, DNA codon algebra, consciousness equations, PS-SHA-infinity |
 | **[Distributed Verification Results](PAPER_VERIFICATION_RESULTS.md)** | 25 mathematical claims verified live across 3 Pi nodes — 24 confirmed, 1 corrected |
 | **[The Raw Notes Verified](PAPER_RAW_NOTES_VERIFIED.md)** | 776 sections, 24 GitHub issues, handwritten notebooks, Dürer square, Claude response — all verified from source |
+| **[Code Experiments (22 Repos)](PAPER_CODE_EXPERIMENTS.md)** | 22 repositories across 9 organizations cloned and executed on Pi 5 hardware — 22/22 pass, 1 bug found, zero dependencies |
 
 ---
 
