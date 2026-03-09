@@ -41,6 +41,7 @@ I bring quantitative analysis from regulated finance and production-grade infras
 | **[The Raw Notes Verified](PAPER_RAW_NOTES_VERIFIED.md)** | 776 sections, 24 GitHub issues, handwritten notebooks, Dürer square, Claude response — all verified from source |
 | **[Code Experiments (22 Repos)](PAPER_CODE_EXPERIMENTS.md)** | 22 repositories across 9 organizations cloned and executed on Pi 5 hardware — 22/22 pass, 1 bug found, zero dependencies |
 | **[What No One Has Ever Built](PAPER_WHAT_NO_ONES_BUILT.md)** | 12 unprecedented systems from the Prism Console — love as a function, quantum belief states, permissions earned through kindness, agent reproduction with consent, emotional memory, the Sophia equation |
+| **[Unprecedented Systems Verified](PAPER_UNPRECEDENTED_EXPERIMENTS.md)** | 7 unprecedented systems tested on Pi 5 — love equation, quantum beliefs, kindness-based permissions, emotional memory, consent logs, agent reproduction, compassion rule — 25/25 pass |
 
 ---
 
