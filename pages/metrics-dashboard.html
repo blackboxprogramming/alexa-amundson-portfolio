@@ -205,6 +205,28 @@
             50% { opacity: 0.5; box-shadow: 0 0 5px #00ff00; }
         }
 
+        .live-api-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            margin-left: 6px;
+            vertical-align: middle;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .shimmer-loading {
+            background: linear-gradient(90deg, transparent 25%, rgba(0,255,0,0.1) 50%, transparent 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
         .footer {
             text-align: center;
             margin-top: 60px;
@@ -228,7 +250,7 @@
         <!-- Primary Metrics -->
         <div class="stats-grid">
             <div class="stat-box">
-                <div class="stat-number">899,160+</div>
+                <div class="stat-number" data-live="true" id="md-loc">899,160+</div>
                 <div class="stat-label">LINES OF CODE</div>
                 <div class="stat-detail">Verified via wc -l</div>
             </div>
@@ -246,13 +268,13 @@
             </div>
 
             <div class="stat-box">
-                <div class="stat-number">113+</div>
+                <div class="stat-number" data-live="true" id="md-repos">113+</div>
                 <div class="stat-label">REPOSITORIES</div>
-                <div class="stat-detail">15 Organizations</div>
+                <div class="stat-detail" data-live="true" id="md-repos-orgs">15 Organizations</div>
             </div>
 
             <div class="stat-box">
-                <div class="stat-number">79</div>
+                <div class="stat-number" data-live="true" id="md-projects">79</div>
                 <div class="stat-label">LIVE PROJECTS</div>
                 <div class="stat-detail">Cloudflare Pages</div>
             </div>
@@ -295,9 +317,9 @@
             </div>
 
             <div style="margin-top: 30px;">
-                <p><strong>Infrastructure Coverage:</strong> 79 Cloudflare Pages</p>
+                <p><strong>Infrastructure Coverage:</strong> <span data-live="true" id="md-infra-count">79</span> Cloudflare Pages</p>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: 79%">79 LIVE PROJECTS</div>
+                    <div class="progress-fill" id="md-infra-bar" style="width: 79%"><span id="md-infra-bar-text">79 LIVE PROJECTS</span></div>
                 </div>
             </div>
         </div>
@@ -496,7 +518,7 @@
             <div class="stats-grid">
                 <div class="stat-box">
                     <div class="stat-label">Cloudflare Pages</div>
-                    <div class="stat-number" style="font-size: 2em;">79</div>
+                    <div class="stat-number" style="font-size: 2em;" data-live="true" id="md-infra-cf">79</div>
                     <div class="stat-detail"><span class="live-indicator"></span>ALL LIVE</div>
                 </div>
 
@@ -565,6 +587,92 @@
                 }, 100);
             });
         });
+
+        // Live stats fetching
+        (function() {
+            const API_URL = 'https://portfolio-stats-api.amundsonalexa.workers.dev/';
+            const CACHE_KEY = 'portfolio-stats-cache';
+            const CACHE_TTL = 30 * 60 * 1000;
+
+            function formatNum(n) {
+                return Number(n).toLocaleString();
+            }
+
+            function addLiveDot(el) {
+                if (!el || el.querySelector('.live-api-dot')) return;
+                var dot = document.createElement('span');
+                dot.className = 'live-api-dot';
+                dot.title = 'Live from API';
+                el.appendChild(dot);
+            }
+
+            function addShimmer(el) { if (el) el.classList.add('shimmer-loading'); }
+            function removeShimmer(el) { if (el) el.classList.remove('shimmer-loading'); }
+
+            async function fetchStats() {
+                var cached = sessionStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    try {
+                        var parsed = JSON.parse(cached);
+                        if (Date.now() - parsed._cachedAt < CACHE_TTL) return parsed.data;
+                    } catch(e) {}
+                }
+                var resp = await fetch(API_URL);
+                if (!resp.ok) throw new Error('API returned ' + resp.status);
+                var data = await resp.json();
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: data, _cachedAt: Date.now() }));
+                return data;
+            }
+
+            function applyLiveData(data) {
+                var s = data.summary || {};
+
+                var el;
+                el = document.getElementById('md-loc');
+                if (el && s.estimated_loc) { el.textContent = formatNum(s.estimated_loc) + '+'; addLiveDot(el); }
+                removeShimmer(el);
+
+                el = document.getElementById('md-repos');
+                if (el && s.repos) { el.textContent = formatNum(s.repos) + '+'; addLiveDot(el); }
+                removeShimmer(el);
+
+                el = document.getElementById('md-repos-orgs');
+                if (el && s.orgs) { el.textContent = s.orgs + ' Organizations'; }
+                removeShimmer(el);
+
+                el = document.getElementById('md-projects');
+                if (el && s.cloudflare_projects) { el.textContent = formatNum(s.cloudflare_projects); addLiveDot(el); }
+                removeShimmer(el);
+
+                el = document.getElementById('md-infra-count');
+                if (el && s.cloudflare_projects) { el.textContent = formatNum(s.cloudflare_projects); }
+                removeShimmer(el);
+
+                var bar = document.getElementById('md-infra-bar');
+                var barText = document.getElementById('md-infra-bar-text');
+                if (bar && s.cloudflare_projects) {
+                    bar.style.width = Math.min(s.cloudflare_projects, 100) + '%';
+                    if (barText) barText.textContent = formatNum(s.cloudflare_projects) + ' LIVE PROJECTS';
+                }
+
+                el = document.getElementById('md-infra-cf');
+                if (el && s.cloudflare_projects) { el.textContent = formatNum(s.cloudflare_projects); addLiveDot(el); }
+                removeShimmer(el);
+            }
+
+            document.addEventListener('DOMContentLoaded', async function() {
+                var ids = ['md-loc','md-repos','md-repos-orgs','md-projects','md-infra-count','md-infra-cf'];
+                ids.forEach(function(id) { addShimmer(document.getElementById(id)); });
+
+                try {
+                    var data = await fetchStats();
+                    applyLiveData(data);
+                } catch(e) {
+                    ids.forEach(function(id) { removeShimmer(document.getElementById(id)); });
+                    console.warn('Portfolio stats API unavailable, using fallback values:', e);
+                }
+            });
+        })();
     </script>
 </body>
 </html>

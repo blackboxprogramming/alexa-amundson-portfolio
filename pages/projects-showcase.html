@@ -213,13 +213,40 @@
         .timeline-description {
             color: #ccc;
         }
+
+        .live-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            margin-left: 6px;
+            vertical-align: middle;
+            animation: live-pulse 2s infinite;
+        }
+
+        @keyframes live-pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 6px #00ff88; }
+            50% { opacity: 0.4; box-shadow: 0 0 2px #00ff88; }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .shimmer-loading {
+            background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.08) 50%, transparent 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="hero">
             <h1>🚀 BlackRoad OS Projects</h1>
-            <p>113+ Repositories | 899,160+ LOC | 79 Live Deployments</p>
+            <p><span data-live="true" id="ps-hero-repos">113+</span> Repositories | <span data-live="true" id="ps-hero-loc">899,160+</span> LOC | <span data-live="true" id="ps-hero-projects">79</span> Live Deployments</p>
         </div>
 
         <h2 class="section-title">🎯 Flagship Projects</h2>
@@ -391,7 +418,7 @@
                 </div>
 
                 <div class="project-links">
-                    <a href="https://alice.blackroad.me" class="project-link">Alice Website</a>
+                    <a href="https://github.com/BlackRoad-OS" class="project-link">GitHub Org</a>
                 </div>
             </div>
 
@@ -403,12 +430,12 @@
                 </div>
 
                 <p class="project-description">
-                    79 Pages projects, 8 KV namespaces, 1 D1 database, 1 Worker, 16 DNS zones. All at $0/month cost. Global CDN with sub-50ms latency.
+                    <span data-live="true" id="ps-cf-desc">79</span> Pages projects, 8 KV namespaces, 1 D1 database, 1 Worker, 16 DNS zones. All at $0/month cost. Global CDN with sub-50ms latency.
                 </p>
 
                 <div class="project-stats">
                     <div class="stat-item">
-                        <div class="stat-number">79</div>
+                        <div class="stat-number" data-live="true" id="ps-cf-pages">79</div>
                         <div class="stat-label">Pages Projects</div>
                     </div>
                     <div class="stat-item">
@@ -539,7 +566,7 @@
         <div class="highlight-section">
             <h3>Cloud & Infrastructure</h3>
             <div class="project-tech" style="margin-top: 20px;">
-                <span class="tech-badge">Cloudflare Pages (79 projects)</span>
+                <span class="tech-badge" data-live="true" id="ps-tech-cf">Cloudflare Pages (79 projects)</span>
                 <span class="tech-badge">Cloudflare Workers</span>
                 <span class="tech-badge">Railway (12 projects)</span>
                 <span class="tech-badge">DigitalOcean</span>
@@ -575,7 +602,7 @@
 
         <div style="text-align: center; margin: 60px 0; padding: 40px; background: rgba(255,0,102,0.1); border-radius: 15px;">
             <h2 style="color: #FF9D00; margin-bottom: 20px;">View All Projects</h2>
-            <p style="margin-bottom: 30px; color: #ccc;">113+ repositories across 15 GitHub organizations</p>
+            <p style="margin-bottom: 30px; color: #ccc;" data-live="true" id="ps-bottom-stats">113+ repositories across 15 GitHub organizations</p>
             <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
                 <a href="https://github.com/BlackRoad-OS" class="project-link">GitHub Organization</a>
                 <a href="https://production.resume-blackroad-io.pages.dev" class="project-link">Main Portfolio</a>
@@ -583,5 +610,96 @@
             </div>
         </div>
     </div>
+
+    <script>
+    (function() {
+        const API_URL = 'https://portfolio-stats-api.amundsonalexa.workers.dev/';
+        const CACHE_KEY = 'portfolio-stats-cache';
+        const CACHE_TTL = 30 * 60 * 1000;
+
+        function formatNum(n) { return Number(n).toLocaleString(); }
+
+        function addLiveDot(el) {
+            if (!el || el.querySelector('.live-dot')) return;
+            var dot = document.createElement('span');
+            dot.className = 'live-dot';
+            dot.title = 'Live from API';
+            el.appendChild(dot);
+        }
+
+        function addShimmer(el) { if (el) el.classList.add('shimmer-loading'); }
+        function removeShimmer(el) { if (el) el.classList.remove('shimmer-loading'); }
+
+        async function fetchStats() {
+            var cached = sessionStorage.getItem(CACHE_KEY);
+            if (cached) {
+                try {
+                    var parsed = JSON.parse(cached);
+                    if (Date.now() - parsed._cachedAt < CACHE_TTL) return parsed.data;
+                } catch(e) {}
+            }
+            var resp = await fetch(API_URL);
+            if (!resp.ok) throw new Error('API returned ' + resp.status);
+            var data = await resp.json();
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: data, _cachedAt: Date.now() }));
+            return data;
+        }
+
+        function applyLiveData(data) {
+            var s = data.summary || {};
+            var gh = data.github || {};
+            var cf = data.cloudflare || {};
+            var el;
+
+            // Hero stats
+            el = document.getElementById('ps-hero-repos');
+            if (el && s.repos) { el.textContent = formatNum(s.repos) + '+'; addLiveDot(el); }
+            removeShimmer(el);
+
+            el = document.getElementById('ps-hero-loc');
+            if (el && s.estimated_loc) { el.textContent = formatNum(s.estimated_loc) + '+'; addLiveDot(el); }
+            removeShimmer(el);
+
+            el = document.getElementById('ps-hero-projects');
+            if (el && s.cloudflare_projects) { el.textContent = formatNum(s.cloudflare_projects); addLiveDot(el); }
+            removeShimmer(el);
+
+            // Cloudflare card
+            el = document.getElementById('ps-cf-desc');
+            if (el && s.cloudflare_projects) { el.textContent = formatNum(s.cloudflare_projects); }
+            removeShimmer(el);
+
+            el = document.getElementById('ps-cf-pages');
+            if (el && s.cloudflare_projects) { el.textContent = formatNum(s.cloudflare_projects); addLiveDot(el); }
+            removeShimmer(el);
+
+            // Tech badge
+            el = document.getElementById('ps-tech-cf');
+            if (el && s.cloudflare_projects) { el.textContent = 'Cloudflare Pages (' + formatNum(s.cloudflare_projects) + ' projects)'; }
+            removeShimmer(el);
+
+            // Bottom section
+            el = document.getElementById('ps-bottom-stats');
+            if (el && s.repos && s.orgs) {
+                el.textContent = formatNum(s.repos) + '+ repositories across ' + s.orgs + ' GitHub organizations';
+                addLiveDot(el);
+            }
+            removeShimmer(el);
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            var ids = ['ps-hero-repos','ps-hero-loc','ps-hero-projects','ps-cf-desc','ps-cf-pages','ps-tech-cf','ps-bottom-stats'];
+            ids.forEach(function(id) { addShimmer(document.getElementById(id)); });
+
+            try {
+                var data = await fetchStats();
+                applyLiveData(data);
+            } catch(e) {
+                ids.forEach(function(id) { removeShimmer(document.getElementById(id)); });
+                console.warn('Portfolio stats API unavailable, using fallback values:', e);
+            }
+        });
+    })();
+    </script>
 </body>
 </html>

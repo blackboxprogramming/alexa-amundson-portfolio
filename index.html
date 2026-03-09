@@ -54,6 +54,66 @@
             backdrop-filter: blur(10px);
         }
 
+        .live-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: live-pulse 2s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes live-pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 6px #00ff88; }
+            50% { opacity: 0.4; box-shadow: 0 0 2px #00ff88; }
+        }
+
+        .live-indicator-tag {
+            display: inline-block;
+            font-size: 0.75em;
+            color: #00ff88;
+            margin-left: 8px;
+            vertical-align: middle;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .live-indicator-tag.visible {
+            opacity: 1;
+        }
+
+        .live-section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0,255,136,0.1);
+            border: 1px solid rgba(0,255,136,0.3);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            color: #00ff88;
+            margin-left: 10px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .live-section-badge.visible {
+            opacity: 1;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .shimmer-loading {
+            background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.15) 50%, transparent 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -278,9 +338,9 @@
         <h1>🚀 Alexa Louise Amundson</h1>
         <div class="tagline">Technical Portfolio - 100000% Verified</div>
         <div class="badges">
-            <span class="badge">899,160+ Lines of Code</span>
+            <span class="badge" data-live="true" id="badge-loc">899,160+ Lines of Code</span>
             <span class="badge">125 Deployments @ 100% Success</span>
-            <span class="badge">79 Live Projects</span>
+            <span class="badge" data-live="true" id="badge-projects">79 Live Projects</span>
             <span class="badge">$0/month Infrastructure</span>
         </div>
     </div>
@@ -288,12 +348,12 @@
     <div class="container">
         <!-- Metrics Section -->
         <div class="section">
-            <h2>💎 Verified Metrics</h2>
+            <h2>💎 Verified Metrics <span class="live-section-badge" id="live-badge"><span class="live-dot"></span> Live data</span></h2>
             <p style="margin-bottom: 20px; color: #ccc;">Every number backed by reproducible commands. No estimates, no hallucinations.</p>
 
             <div class="metrics-grid">
                 <div class="metric-card">
-                    <div class="metric-number">899,160+</div>
+                    <div class="metric-number" data-live="true" id="metric-loc">899,160+</div>
                     <div class="metric-label">Lines of Code</div>
                     <div class="metric-verify">wc -l verified</div>
                 </div>
@@ -317,13 +377,13 @@
                 </div>
 
                 <div class="metric-card">
-                    <div class="metric-number">113+</div>
+                    <div class="metric-number" data-live="true" id="metric-repos">113+</div>
                     <div class="metric-label">Repositories</div>
-                    <div class="metric-verify">15 GitHub orgs</div>
+                    <div class="metric-verify" data-live="true" id="metric-repos-orgs">15 GitHub orgs</div>
                 </div>
 
                 <div class="metric-card">
-                    <div class="metric-number">79</div>
+                    <div class="metric-number" data-live="true" id="metric-cf-projects">79</div>
                     <div class="metric-label">Cloudflare Projects</div>
                     <div class="metric-verify">Live dashboard</div>
                 </div>
@@ -365,7 +425,7 @@
                 <div class="demo-card">
                     <span class="demo-status status-live">✅ LIVE</span>
                     <h3>GitHub Organization</h3>
-                    <p>80+ repositories, 43 public. Complete infrastructure codebase with cryptographic verification.</p>
+                    <p><span data-live="true" id="demo-repo-counts">80+ repositories, 43 public</span>. Complete infrastructure codebase with cryptographic verification.</p>
                     <a href="https://github.com/BlackRoad-OS" target="_blank" class="demo-link">View Repos →</a>
                 </div>
             </div>
@@ -571,6 +631,143 @@ cat ~/.blackroad/memory/journals/master-journal.jsonl | jq -r 'select(.action=="
             el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
             observer.observe(el);
         });
+    </script>
+
+    <script>
+    (function() {
+        const API_URL = 'https://portfolio-stats-api.amundsonalexa.workers.dev/';
+        const CACHE_KEY = 'portfolio-stats-cache';
+        const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+
+        function formatNum(n) {
+            return Number(n).toLocaleString();
+        }
+
+        function addLiveDot(el) {
+            if (!el || el.querySelector('.live-dot')) return;
+            const dot = document.createElement('span');
+            dot.className = 'live-dot';
+            dot.title = 'Live data';
+            el.prepend(dot);
+        }
+
+        function addShimmer(el) {
+            if (el) el.classList.add('shimmer-loading');
+        }
+
+        function removeShimmer(el) {
+            if (el) el.classList.remove('shimmer-loading');
+        }
+
+        async function fetchStats() {
+            // Check sessionStorage cache
+            const cached = sessionStorage.getItem(CACHE_KEY);
+            if (cached) {
+                try {
+                    const parsed = JSON.parse(cached);
+                    if (Date.now() - parsed._cachedAt < CACHE_TTL) {
+                        return parsed.data;
+                    }
+                } catch(e) {}
+            }
+
+            const resp = await fetch(API_URL);
+            if (!resp.ok) throw new Error('API returned ' + resp.status);
+            const data = await resp.json();
+
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, _cachedAt: Date.now() }));
+            return data;
+        }
+
+        function applyLiveData(data) {
+            const s = data.summary || {};
+            const gh = data.github || {};
+            const cf = data.cloudflare || {};
+
+            // Badge: LOC
+            const badgeLoc = document.getElementById('badge-loc');
+            if (badgeLoc && s.estimated_loc) {
+                badgeLoc.textContent = formatNum(s.estimated_loc) + '+ Lines of Code';
+                addLiveDot(badgeLoc);
+            }
+            removeShimmer(badgeLoc);
+
+            // Badge: Projects
+            const badgeProj = document.getElementById('badge-projects');
+            if (badgeProj && s.cloudflare_projects) {
+                badgeProj.textContent = formatNum(s.cloudflare_projects) + ' Live Projects';
+                addLiveDot(badgeProj);
+            }
+            removeShimmer(badgeProj);
+
+            // Metric: LOC
+            const metricLoc = document.getElementById('metric-loc');
+            if (metricLoc && s.estimated_loc) {
+                metricLoc.textContent = formatNum(s.estimated_loc) + '+';
+            }
+            removeShimmer(metricLoc);
+
+            // Metric: Repos
+            const metricRepos = document.getElementById('metric-repos');
+            if (metricRepos && s.repos) {
+                metricRepos.textContent = formatNum(s.repos) + '+';
+            }
+            removeShimmer(metricRepos);
+
+            // Metric: Repos orgs detail
+            const metricOrgs = document.getElementById('metric-repos-orgs');
+            if (metricOrgs && s.orgs) {
+                metricOrgs.textContent = s.orgs + ' GitHub orgs';
+            }
+            removeShimmer(metricOrgs);
+
+            // Metric: CF Projects
+            const metricCf = document.getElementById('metric-cf-projects');
+            if (metricCf && s.cloudflare_projects) {
+                metricCf.textContent = formatNum(s.cloudflare_projects);
+            }
+            removeShimmer(metricCf);
+
+            // Demo card: repo counts
+            const demoRepos = document.getElementById('demo-repo-counts');
+            if (demoRepos && gh.total_repos) {
+                const orgRepos = gh.orgs ? gh.orgs.reduce(function(a, o) { return a + (o.public_repos || 0); }, 0) : gh.public_repos;
+                demoRepos.textContent = formatNum(gh.total_repos) + '+ repositories, ' + formatNum(gh.public_repos) + ' public';
+            }
+            removeShimmer(demoRepos);
+
+            // Show live badge
+            const liveBadge = document.getElementById('live-badge');
+            if (liveBadge) liveBadge.classList.add('visible');
+
+            // Add live dots to metric cards that have data-live
+            document.querySelectorAll('[data-live="true"]').forEach(function(el) {
+                var tag = el.querySelector('.live-indicator-tag');
+                if (!tag && el.classList.contains('metric-number')) {
+                    tag = document.createElement('span');
+                    tag.className = 'live-indicator-tag visible';
+                    tag.innerHTML = '<span class="live-dot"></span>';
+                    el.appendChild(tag);
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Add shimmer to live elements
+            var liveEls = ['badge-loc', 'badge-projects', 'metric-loc', 'metric-repos',
+                           'metric-repos-orgs', 'metric-cf-projects', 'demo-repo-counts'];
+            liveEls.forEach(function(id) { addShimmer(document.getElementById(id)); });
+
+            try {
+                var data = await fetchStats();
+                applyLiveData(data);
+            } catch(e) {
+                // Fallback: just remove shimmer, keep hardcoded values
+                liveEls.forEach(function(id) { removeShimmer(document.getElementById(id)); });
+                console.warn('Portfolio stats API unavailable, using fallback values:', e);
+            }
+        });
+    })();
     </script>
 </body>
 </html>

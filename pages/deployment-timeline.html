@@ -209,6 +209,61 @@
         .success-dot { background: #00ff00; }
         .peak-dot { background: #FF0066; }
         .milestone-dot { background: #FF9D00; }
+
+        .live-stats-footer {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            background: rgba(0,255,136,0.05);
+            border: 1px solid rgba(0,255,136,0.3);
+            border-radius: 10px;
+            padding: 20px 30px;
+            margin: 40px 0;
+        }
+
+        .live-stats-footer .ls-item {
+            text-align: center;
+        }
+
+        .live-stats-footer .ls-value {
+            font-size: 1.8em;
+            color: #00ff88;
+            text-shadow: 0 0 8px rgba(0,255,136,0.4);
+        }
+
+        .live-stats-footer .ls-label {
+            font-size: 0.85em;
+            color: #0a0;
+            margin-top: 4px;
+        }
+
+        .live-dot-small {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+            animation: live-pulse 2s infinite;
+        }
+
+        @keyframes live-pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 6px #00ff88; }
+            50% { opacity: 0.4; box-shadow: 0 0 2px #00ff88; }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .shimmer-loading {
+            background: linear-gradient(90deg, transparent 25%, rgba(0,255,136,0.08) 50%, transparent 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
     </style>
 </head>
 <body>
@@ -430,6 +485,32 @@
             </div>
         </div>
 
+        <div class="live-stats-footer" id="dt-live-footer" style="display:none;">
+            <div style="width:100%; text-align:center; margin-bottom:10px; font-size:0.85em; color:#00ff88;">
+                <span class="live-dot-small"></span> CURRENT STATS (LIVE)
+            </div>
+            <div class="ls-item">
+                <div class="ls-value" id="dt-live-repos">--</div>
+                <div class="ls-label">Repositories</div>
+            </div>
+            <div class="ls-item">
+                <div class="ls-value" id="dt-live-loc">--</div>
+                <div class="ls-label">Lines of Code</div>
+            </div>
+            <div class="ls-item">
+                <div class="ls-value" id="dt-live-projects">--</div>
+                <div class="ls-label">Cloudflare Projects</div>
+            </div>
+            <div class="ls-item">
+                <div class="ls-value" id="dt-live-domains">--</div>
+                <div class="ls-label">Domains</div>
+            </div>
+            <div class="ls-item">
+                <div class="ls-value" id="dt-live-orgs">--</div>
+                <div class="ls-label">GitHub Orgs</div>
+            </div>
+        </div>
+
         <div style="text-align: center; padding: 40px; color: #0a0;">
             <p><strong>DEPLOYMENT TIMELINE</strong></p>
             <p style="margin-top: 10px;">Generated from PS-SHA-∞ memory journal</p>
@@ -442,6 +523,48 @@
 
     <script>
         document.getElementById('timestamp').textContent = new Date().toLocaleString();
+
+        (function() {
+            const API_URL = 'https://portfolio-stats-api.amundsonalexa.workers.dev/';
+            const CACHE_KEY = 'portfolio-stats-cache';
+            const CACHE_TTL = 30 * 60 * 1000;
+
+            function formatNum(n) { return Number(n).toLocaleString(); }
+
+            async function fetchStats() {
+                var cached = sessionStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    try {
+                        var parsed = JSON.parse(cached);
+                        if (Date.now() - parsed._cachedAt < CACHE_TTL) return parsed.data;
+                    } catch(e) {}
+                }
+                var resp = await fetch(API_URL);
+                if (!resp.ok) throw new Error('API returned ' + resp.status);
+                var data = await resp.json();
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: data, _cachedAt: Date.now() }));
+                return data;
+            }
+
+            document.addEventListener('DOMContentLoaded', async function() {
+                try {
+                    var data = await fetchStats();
+                    var s = data.summary || {};
+                    var cf = data.cloudflare || {};
+
+                    document.getElementById('dt-live-repos').textContent = formatNum(s.repos || 0) + '+';
+                    document.getElementById('dt-live-loc').textContent = formatNum(s.estimated_loc || 0) + '+';
+                    document.getElementById('dt-live-projects').textContent = formatNum(s.cloudflare_projects || 0);
+                    document.getElementById('dt-live-domains').textContent = formatNum(cf.total_domains || s.cloudflare_domains || 0);
+                    document.getElementById('dt-live-orgs').textContent = formatNum(s.orgs || 0);
+
+                    document.getElementById('dt-live-footer').style.display = 'flex';
+                    document.getElementById('dt-live-footer').style.flexWrap = 'wrap';
+                } catch(e) {
+                    console.warn('Portfolio stats API unavailable:', e);
+                }
+            });
+        })();
     </script>
 </body>
 </html>
