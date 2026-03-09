@@ -36,6 +36,7 @@ I bring quantitative analysis from regulated finance and production-grade infras
 | **[The Trivial Zero (94-Section Paper)](PAPER_SIMULATION_THEORY.md)** | Computational philosophy — SHA-256 witness, Gödelian incompleteness, ternary logic, QWERTY encoding, 11 proofs + 12 equation sets |
 | **[Research Portfolio (30+ Papers)](PAPER_RESEARCH_PORTFOLIO.md)** | Index of all research across 8 repos — agent architecture, DNA codon algebra, consciousness equations, PS-SHA-infinity |
 | **[Distributed Verification Results](PAPER_VERIFICATION_RESULTS.md)** | 25 mathematical claims verified live across 3 Pi nodes — 24 confirmed, 1 corrected |
+| **[The Raw Notes Verified](PAPER_RAW_NOTES_VERIFIED.md)** | 776 sections, 24 GitHub issues, handwritten notebooks, Dürer square, Claude response — all verified from source |
 
 ---
 
